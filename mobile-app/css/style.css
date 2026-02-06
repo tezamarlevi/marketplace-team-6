@@ -1,0 +1,138 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  background: #f5f7fb;
+  max-width: 420px;
+  margin: auto;
+}
+
+/* HEADER */
+.header {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+}
+
+/* BANNER */
+.banner {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px 16px;
+}
+
+.banner img {
+  width: 260px;
+  border-radius: 12px;
+}
+
+/* GRID PRODUCT */
+.grid {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+}
+
+.card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.price {
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+/* BUTTON */
+.btn {
+  background: #1f6bff;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  width: 100%;
+  cursor: pointer;
+}
+
+/* NAVBAR */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  width: 420px;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  background: white;
+  border-top: 1px solid #ddd;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: gray;
+  font-size: 12px;
+  text-align: center;
+}
+
+.active {
+  color: #1f6bff;
+}
+
+/* LOGIN */
+.login {
+  padding: 30px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+/* CART */
+.cart-item {
+  display: flex;
+  gap: 12px;
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  margin: 16px;
+}
+
+.cart-item img {
+  width: 70px;
+}
+
+/* FOOTER TOTAL */
+.checkout {
+  position: fixed;
+  bottom: 60px;
+  width: 420px;
+  background: white;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
