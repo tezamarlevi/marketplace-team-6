@@ -52,7 +52,7 @@ export default function LoginScreen() {
             }
         } catch (error) {
             console.error("Login Error:", error);
-            Alert.alert("Error", "Gagal terhubung ke server. Periksa koneksi internet Anda.");
+            Alert.alert("Error", "Can't connect to server");
         } finally {
             setLoading(false);
         }

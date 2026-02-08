@@ -22,7 +22,7 @@ export default function ProductScreen() {
       setProducts(data);
       setFilteredProducts(data); 
     } catch (error) {
-      console.error("Gagal ambil data:", error);
+      console.error("Failed to get data:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
