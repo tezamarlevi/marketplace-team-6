@@ -1,32 +1,91 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, Image, TouchableOpacity, ScrollView, StatusBar, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import styles from '../../components/CartStyles';
+import { API_URL } from '../../constants/Api';
 
 export default function CartScreen() {
+    const [cartItems, setCartItems] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [totalPrice, setTotalPrice] = useState(0);
 
-    const cartItems = [
-        { 
-        id: 1, 
-        name: 'Jam Tangan', 
-        price: 150000, 
-        image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8amFtJTIwdGFuZ2FufGVufDB8fDB8fHww' 
-        },
-        { 
-        id: 2, 
-        name: 'Baju Hitam Polos', 
-        price: 100000, 
-        image: 'https://images.unsplash.com/photo-1618354691321-e851c56960d1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFqdSUyMGhpdGFtJTIwcG9sb3N8ZW58MHx8MHx8fDA%3D' 
-        },
-    ];
+    useFocusEffect(
+        useCallback(() => {
+        fetchCart();
+        }, [])
+    );
 
-    const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
+    const fetchCart = async () => {
+        try {
+        const token = await AsyncStorage.getItem('userToken');
+        if (!token) {
+            setLoading(false);
+            return;
+        }
 
-    const formatRupiah = (num: number) => {
-        return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        const response = await fetch(`${API_URL}/api/cart`, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+
+        if (response.ok) {
+            const items = data.items || []; 
+            setCartItems(items);
+            
+            const total = items.reduce((sum: number, item: any) => {
+            return sum + (item.product.price * item.quantity);
+            }, 0);
+            setTotalPrice(total);
+        }
+        } catch (error) {
+        console.error("Can't get cart:", error);
+        } finally {
+        setLoading(false);
+        }
     };
+
+
+    const removeItem = async (productId: string) => {
+        try {
+        const token = await AsyncStorage.getItem('userToken');
+        const response = await fetch(`${API_URL}/api/cart/${productId}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            Alert.alert("Success", "Product erased from cart");
+            fetchCart(); 
+        } else {
+            Alert.alert("Fail", "Can't erase product");
+        }
+        } catch (error) {
+        console.error(error);
+        }
+    };
+
+    const handleCheckout = () => {
+        if (cartItems.length === 0) {
+        Alert.alert("Empty", "Your cart is empty");
+        return;
+        }
+        Alert.alert("Checkout succesfull!", "Your order is being processed");
+        router.push('/(tabs)');
+    };
+
+    if (loading) {
+        return (
+        <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+            <ActivityIndicator size="large" color="#be123c" />
+        </View>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
@@ -36,35 +95,49 @@ export default function CartScreen() {
             <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={28} color="#000" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>My Cart</Text>
+            <Text style={styles.headerTitle}>My cart</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.cartList}>
-            {cartItems.map((item) => (
-            <View key={item.id} style={styles.cartItem}>
-                <Image source={{ uri: item.image }} style={styles.itemImage} />
-                <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemPrice}>{formatRupiah(item.price)}</Text>
-                </View>
-                
-                {/*tambahin fungsi hapus product*/}
-                <TouchableOpacity>
-                <Ionicons name="trash-outline" size={20} color="#ff4444" />
-                </TouchableOpacity>
-
+            {cartItems.length === 0 ? (
+            <View style={{alignItems:'center', marginTop: 50}}>
+                <Ionicons name="cart-outline" size={60} color="#ddd" />
+                <Text style={{color:'#888', marginTop:10}}>Empty cart </Text>
             </View>
-            ))}
+            ) : (
+            cartItems.map((item, index) => (
+                <View key={index} style={styles.cartItem}>
+                <Image source={{ uri: item.product.image }} style={styles.itemImage} />
+                
+                <View style={styles.itemInfo}>
+                    <Text style={styles.itemName}>{item.product.name}</Text>
+                    <Text style={{fontSize:12, color:'#666', marginBottom: 5}}>Qty: {item.quantity}</Text>
+                    <Text style={styles.itemPrice}>
+                    Rp {(item.product.price * item.quantity).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                    </Text>
+                </View>
+
+                <TouchableOpacity onPress={() => removeItem(item.product._id)}>
+                    <Ionicons name="trash-outline" size={24} color="red" />
+                </TouchableOpacity>
+                </View>
+            ))
+            )}
         </ScrollView>
 
         <View style={styles.footer}>
             <View>
             <Text style={styles.totalText}>Total:</Text>
-            <Text style={styles.totalPrice}>{formatRupiah(totalPrice)}</Text>
+            <Text style={styles.totalPrice}>
+                Rp {totalPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+            </Text>
             </View>
             
-            {/*tambahin fungsi checkout yang ngilangin semua barang*/}
-            <TouchableOpacity style={styles.checkoutButton}>
+            <TouchableOpacity 
+            style={[styles.checkoutButton, cartItems.length === 0 && {backgroundColor: '#ccc'}]}
+            onPress={handleCheckout}
+            disabled={cartItems.length === 0}
+            >
             <Text style={styles.checkoutText}>Checkout</Text>
             </TouchableOpacity>
         </View>

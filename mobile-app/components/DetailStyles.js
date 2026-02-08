@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   descriptionText: {
-    fontSize: 14,
-    color: '#555',
+    fontSize: 18,
+    color: '#000',
     lineHeight: 22,
   },
   footer: {

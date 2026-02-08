@@ -1,0 +1,1 @@
+export const API_URL = 'https://marketplace-api-team-6.onrender.com';
