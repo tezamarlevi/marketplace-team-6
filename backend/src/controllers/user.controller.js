@@ -11,7 +11,8 @@ const generateToken = (id) => {
 
 // REGISTER
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  console.log("🟢 The request actually reached the controller!");
+  const { name, email, password, role } = req.body;
 
   try {
     if (!name || !email || !password) {
@@ -33,6 +34,7 @@ export const register = async (req, res) => {
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
+      role: role || "user", // Default to "user" if role is not provided
     });
 
     res.status(201).json({
