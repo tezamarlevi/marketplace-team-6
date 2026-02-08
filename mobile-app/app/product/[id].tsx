@@ -1,32 +1,95 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, StatusBar } from 'react-native';
-import { useLocalSearchParams, router, Stack } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { 
+  View, Text, Image, TouchableOpacity, ScrollView, StatusBar, Alert, ActivityIndicator 
+} from 'react-native';
+import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../components/DetailStyles';
+import { API_URL } from '../../constants/Api'; 
 
 export default function ProductDetail() {
   const { id } = useLocalSearchParams();
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(false);
 
-  const products = [
-    { id: 1, name: 'Baju Hitam Polos', price: 'Rp 100.000', description: 'Baju hitam polos berbahan katun combed 30s yang nyaman dipakai sehari-hari. Anti gerah dan menyerap keringat.', image: 'https://images.unsplash.com/photo-1618354691321-e851c56960d1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFqdSUyMGhpdGFtJTIwcG9sb3N8ZW58MHx8MHx8fDA%3D' },
-    { id: 2, name: 'Botol Minum', price: 'Rp 70.000', description: 'Botol minum stainless steel tahan panas dan dingin hingga 12 jam. Cocok untuk dibawa olahraga atau kerja.', image: 'https://images.unsplash.com/photo-1585250815365-a90a469677c5?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-    { id: 3, name: 'Jam Tangan Casio', price: 'Rp 150.000', description: 'Jam tangan digital klasik dengan fitur stopwatch, alarm, dan tahan air. Desain retro yang tak lekang oleh waktu.', image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8amFtJTIwdGFuZ2FufGVufDB8fDB8fHww' },
-    { id: 4, name: 'Sepatu Lari Nike', price: 'Rp 350.000', description: 'Sepatu lari ringan dengan bantalan empuk. Membuat lari Anda lebih kencang dan kaki tidak mudah lelah.', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2VwYXR1JTIwbGFyaXxlbnwwfHwwfHx8MA%3D%3D' },
-  ];
+useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/products`);
+        const data = await response.json();
+        const found = data.find((item: any) => item._id === id);
+        setProduct(found);
+      } catch (error) {
+        console.error("Can't get detail:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const product = products.find((p) => p.id == Number(id));
+    if (id) fetchDetail();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+        <ActivityIndicator size="large" color="#be123c" />
+      </View>
+    );
+  }
 
   if (!product) {
     return (
-      <View style={styles.center}>
-        <Text>Produk tidak ditemukan!</Text>
+      <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+        <Text>Product not found!</Text>
         <TouchableOpacity onPress={() => router.back()} style={{marginTop: 20}}>
-          <Text style={{color: 'blue', fontSize: 30}}>Kembali</Text>
+          <Text style={{color: 'blue', fontSize: 18}}>Back</Text>
         </TouchableOpacity>
       </View>
     );
   }
+
+  const handleAddToCart = async () => {
+    setAddingToCart(true);
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      
+      if (!token) {
+        Alert.alert("Please login!", "You need to login to add to cart.");
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/cart`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          productId: product._id, 
+          quantity: 1             
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert("Success", "Added to cart!");
+        router.push('/cart');
+      } else {
+        Alert.alert("Fail", data.message || "Can't add to cart");
+      }
+
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Can't connect to server");
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -36,8 +99,11 @@ export default function ProductDetail() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Product Description</Text>
-        <View style={{ width: 28 }} /> 
+        <Text style={styles.headerTitle}>Product Detail</Text>
+        
+        <TouchableOpacity onPress={() => router.push('/cart')}>
+           <Ionicons name="cart-outline" size={24} color="#000" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -48,19 +114,37 @@ export default function ProductDetail() {
 
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{product.name}</Text>
-          <Text style={styles.price}>{product.price}</Text>
           
-          <Text style={styles.descriptionTitle}>Product Description</Text>
+          <Text style={styles.price}>
+            Rp {product.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+          </Text>
+          
+          <View style={{flexDirection:'row', marginTop: 10, gap: 10}}>
+             <View style={{backgroundColor:'#f3f4f6', padding:5, borderRadius:5}}>
+                <Text style={{fontSize:15, color:'#222'}}>Stock: {product.stock}</Text>
+             </View>
+             <View style={{backgroundColor:'#f3f4f6', padding:5, borderRadius:5}}>
+                <Text style={{fontSize:15, color:'#222'}}>{product.category}</Text>
+             </View>
+          </View>
+
+          <Text style={styles.descriptionTitle}>Description</Text>
           <Text style={styles.descriptionText}>
-            {product.description || "Tidak ada deskripsi untuk produk ini."}
+            {product.description || "No description."}
           </Text>
         </View>
 
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/cart')}>
-          <Text style={styles.buttonText}>Add to Cart</Text>
+        <TouchableOpacity 
+          style={[styles.button, addingToCart && {backgroundColor: '#ccc'}]} 
+          onPress={handleAddToCart}
+          disabled={addingToCart}
+        >
+          <Text style={styles.buttonText}>
+            {addingToCart ? "Adding..." : "Add to Cart"}
+          </Text>
         </TouchableOpacity>
       </View>
 
