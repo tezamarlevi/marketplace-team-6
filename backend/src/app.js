@@ -1,0 +1,29 @@
+import express from "express";
+import morgan from "morgan";
+import cors from "cors";
+import dotenv from "dotenv";
+import productRoutes from "./routes/product.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import mongoose from "mongoose";
+import { connectDB } from "./config.js";
+import { notFound, errorHandler } from "./middlewares/error.middleware.js";
+import cartRoutes from "./routes/cart.routes.js";
+
+
+dotenv.config();
+const app = express();
+
+connectDB();
+
+app.use(cors());
+app.use(morgan("dev"));
+app.use(express.json());
+app.use("/api/products", productRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/cart", cartRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5001;
+app.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`));
