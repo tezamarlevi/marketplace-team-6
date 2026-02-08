@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import productRoutes from "./routes/product.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import mongoose from "mongoose";
-import { config } from "./config.js";
+import { connectDB } from "./config.js";
 import { notFound, errorHandler } from "./middlewares/error.middleware.js";
 import cartRoutes from "./routes/cart.routes.js";
 
@@ -18,7 +18,6 @@ connectDB();
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
-// app.get("/", (req, res) => res.json({ message: "API is running" }));
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/cart", cartRoutes);
