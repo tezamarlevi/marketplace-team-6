@@ -4,18 +4,22 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context'; 
 import { Ionicons } from '@expo/vector-icons'; 
+import { useNavigation } from 'expo-router';
 import { router, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../components/DashboardStyles';
 import { API_URL } from '../../constants/Api';
+import ProfileModal from '../ProfileModal';
 
 export default function HomeScreen() {
   const [products, setProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const navigation = useNavigation();
   const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [userName, setUserName] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
-useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       const checkLoginStatus = async () => {
         try {
@@ -60,7 +64,7 @@ useFocusEffect(
       
     <View style={styles.header}>
       {isLoggedIn ? (
-        <View style={styles.userInfo}>
+        <TouchableOpacity style={styles.userInfo} onPress={() => setModalVisible(true)}>
           <View style={styles.avatarContainer}>
             <Ionicons name="person" size={24} color="#555" />
           </View>
@@ -68,7 +72,7 @@ useFocusEffect(
             <Text style={styles.greeting}>Hello, </Text>
             <Text style={styles.username}>{userName}</Text>
           </View>
-        </View>
+        </TouchableOpacity>
       ) : (
         <TouchableOpacity 
           style={styles.userInfo} 
@@ -133,7 +137,10 @@ useFocusEffect(
         
         <View style={{ height: 80 }} />
       </ScrollView>
-
+      <ProfileModal 
+        visible={modalVisible} 
+        onClose={() => setModalVisible(false)} 
+      />
     </SafeAreaView>
   );
 }

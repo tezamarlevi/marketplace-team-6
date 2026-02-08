@@ -11,35 +11,42 @@ interface ProfileModalProps {
 }
 
 export default function ProfileModal({ visible, onClose }: ProfileModalProps) {
-  const [userData, setUserData] = useState({ name: 'User', email: 'Loading...' });
-
+  const [userData, setUserData] = useState({ name: 'Loading...', email: '...' });
   useEffect(() => {
     const getUser = async () => {
-        const token = await AsyncStorage.getItem('userToken');
-        if(token) {
-            setUserData({ name: 'Pelanggan Setia', email: 'user@marketplace.com' });
+      try {
+        const jsonValue = await AsyncStorage.getItem('userData');
+        if (jsonValue != null) {
+          const parsedUser = JSON.parse(jsonValue);
+          setUserData({ 
+            name: parsedUser.name || 'User Marketplace', 
+            email: parsedUser.email || 'user@example.com' 
+          });
         }
-    };
-    if (visible) getUser();
-  }, [visible]);
+      } catch(e) {
+        console.error("Can't read user data", e);
+      }
+  };
+    
+  if (visible) getUser();
+}, [visible]);
 
   const handleLogout = async () => {
-    Alert.alert("Logout", "Yakin mau keluar?", [
-      { text: "Batal", style: "cancel" },
-      {
-        text: "Ya, Keluar",
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await AsyncStorage.removeItem('userToken');
-            onClose(); 
-            router.replace('/login'); 
-          } catch (error) {
-            console.error(error);
-          }
-        }
-      }
-    ]);
+    console.log("1. Tombol ditekan, mencoba logout langsung...");
+    
+    try {
+      await AsyncStorage.multiRemove(['userToken', 'userData']);
+      console.log("2. Data terhapus");
+      onClose();
+
+      setTimeout(() => {
+        console.log("3. Pindah ke Login");
+        router.replace('/login');
+      }, 300);
+
+    } catch (error) {
+      console.error("Logout Failed:", error);
+    }
   };
 
   return (
