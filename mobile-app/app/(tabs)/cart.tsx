@@ -69,13 +69,32 @@ export default function CartScreen() {
         }
     };
 
-    const handleCheckout = () => {
+    const handleCheckout = async () => {
         if (cartItems.length === 0) {
-        Alert.alert("Empty", "Your cart is empty");
-        return;
+            Alert.alert("Empty", "Your cart is empty");
+            return;
         }
-        Alert.alert("Checkout succesfull!", "Your order is being processed");
-        router.push('/(tabs)');
+
+        try {
+            const token = await AsyncStorage.getItem('userToken');
+            
+            const response = await fetch(`${API_URL}/api/cart`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                setCartItems([]); 
+                setTotalPrice(0);
+                Alert.alert("Success", "Checkout successful! Order processed.");
+                router.replace('/(tabs)'); 
+            } else {
+                Alert.alert("Error", "Checkout failed. Try again.");
+            }
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error", "Network error");
+        }
     };
 
     if (loading) {
