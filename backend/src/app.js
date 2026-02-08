@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import productRoutes from "./routes/product.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import mongoose from "mongoose";
-import { connectDB } from "./config.js";
+import { config } from "./config.js";
 import { notFound, errorHandler } from "./middlewares/error.middleware.js";
 import cartRoutes from "./routes/cart.routes.js";
 
