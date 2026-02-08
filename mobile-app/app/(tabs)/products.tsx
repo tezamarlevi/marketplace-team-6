@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { router} from 'expo-router';
 import styles from '../../components/ProductStyles';
 
 export default function ProductScreen() {
@@ -36,18 +37,22 @@ export default function ProductScreen() {
           />
         </View>
 
-        <TouchableOpacity style={styles.cartButton}>
+        <TouchableOpacity style={styles.cartButton} onPress={() => router.push('/cart')}>
           <Ionicons name="cart-outline" size={26} color="#111827" />
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
         
-        <Text style={styles.sectionTitle}>Rekomendasi</Text>
+        <Text style={styles.sectionTitle}>Recommendation</Text>
 
         <View style={styles.productGrid}>
           {allProducts.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.card}>
+            <TouchableOpacity 
+            key={item.id} 
+            style={styles.card}
+            onPress={() => router.push(`../product/${item.id}`)}
+            >
               <Image source={{ uri: item.image }} style={styles.cardImage} />
               <View>
                 <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>

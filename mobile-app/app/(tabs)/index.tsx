@@ -5,7 +5,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'; 
 import { Ionicons } from '@expo/vector-icons'; 
 import { router, useLocalSearchParams } from 'expo-router';
-
 import styles from '../../components/DashboardStyles';
 
 export default function HomeScreen() {
@@ -38,7 +37,7 @@ export default function HomeScreen() {
               <Ionicons name="person" size={24} color="#555" />
             </View>
             <View>
-              <Text style={styles.greeting}>Halo, Selamat Datang</Text>
+              <Text style={styles.greeting}>Hello, </Text>
               <Text style={styles.username}>{userName}</Text>
             </View>
           </View>
@@ -51,9 +50,9 @@ export default function HomeScreen() {
               <Ionicons name="log-in-outline" size={24} color="#f43f5e" />
             </View>
             <View>
-              <Text style={styles.greeting}>Kamu belum login</Text>
+              <Text style={styles.greeting}>You haven't logged in</Text>
               <Text style={[styles.username, { color: '#f43f5e' }]}>
-                Masuk / Daftar Sekarang
+                Login / Register here
               </Text>
             </View>
           </TouchableOpacity>
@@ -65,7 +64,8 @@ export default function HomeScreen() {
             <Ionicons name="search-outline" size={22} color="#333" />
             
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton}
+          onPress={() => router.push('/cart')}>
             <Ionicons name="cart-outline" size={22} color="#333" />
           </TouchableOpacity>
         </View>
@@ -74,7 +74,7 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 10 }}>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Promo Spesial 🔥</Text>
+          <Text style={styles.sectionTitle}>Special Deals 🔥</Text>
           <View style={styles.bannerContainer}>
             <Image 
               source={{ uri: 'https://plus.unsplash.com/premium_photo-1671076131210-5376fccb100b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8YmFubmVyJTIwc2FsZXxlbnwwfHwwfHx8MA%3D%3D' }} 
@@ -84,10 +84,14 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Rekomendasi Untukmu</Text>
+          <Text style={styles.sectionTitle}>Recommended for you</Text>
           <View style={styles.productGrid}>
             {products.map((item) => (
-              <TouchableOpacity key={item.id} style={styles.card}>
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.card}
+                onPress={() => router.push(`../product/${item.id}`)}
+                >
                 <Image source={{ uri: item.image }} style={styles.cardImage} />
                 <View style={styles.cardContent}>
                   <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>

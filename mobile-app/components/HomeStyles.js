@@ -35,9 +35,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
-  registerButton: {
-    backgroundColor: '#10b981', 
-  },
   buttonText: {
     color: 'white',
     fontSize: 16,
