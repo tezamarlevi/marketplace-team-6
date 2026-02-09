@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactGA from "react-ga4";
 import { 
   Text, View, ScrollView, Image, TouchableOpacity, StatusBar 
 } from 'react-native';
@@ -10,6 +11,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../components/DashboardStyles';
 import { API_URL } from '../../constants/Api';
 import ProfileModal from '../ProfileModal';
+
+ReactGA.initialize("G-VXJK0H8ETY");
 
 export default function HomeScreen() {
   const [products, setProducts] = useState<any[]>([]);
@@ -44,6 +47,7 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
+    ReactGA.send({ hitType: "pageview", page: "/home" });
     fetch(`${API_URL}/api/products`)
       .then(res => res.json())
       .then(data => {
